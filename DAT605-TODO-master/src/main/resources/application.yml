@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: todo
+  output:
+    ansi:
+      enabled: ALWAYS
+  profiles:
+    active: local
+  mvc:
+    view:
+      suffix: .html
+  datasource:
+    url: jdbc:mysql://166.78.135.76:3306/dat605todo
+    username: dat605todo
+    password: dat605todo
+    driver-class-name: com.mysql.jdbc.Driver
+    schema:
+    data:
+
+  jpa:
+      show-sql: false
+      generate-ddl: false
+      hibernate:
+        ddl-auto: validate
+---
+spring:
+  profiles: local
+
+---
+spring:
+  profiles: cloud

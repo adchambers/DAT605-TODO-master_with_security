@@ -9,16 +9,9 @@ spring:
   mvc:
     view:
       suffix: .html
-  datasource:
-    url: jdbc:mysql://166.78.135.76:3306/dat605todo
-    username: dat605todo
-    password: dat605todo
-    driver-class-name: com.mysql.jdbc.Driver
-    schema:
-    data:
 
   jpa:
-      show-sql: false
+      show-sql: true
       generate-ddl: false
       hibernate:
         ddl-auto: validate
@@ -29,3 +22,11 @@ spring:
 ---
 spring:
   profiles: cloud
+
+  datasource:
+      url: jdbc:mysql://166.78.135.76:3306/dat605todo
+      username: dat605todo
+      password: dat605todo
+      driver-class-name: com.mysql.jdbc.Driver
+      schema:
+      data:

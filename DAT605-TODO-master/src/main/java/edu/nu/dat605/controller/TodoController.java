@@ -3,7 +3,12 @@ package edu.nu.dat605.controller;
 import edu.nu.dat605.entity.Todo;
 import edu.nu.dat605.repository.TodoRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +23,7 @@ public class TodoController {
     @Autowired
     TodoRepo todoRepo;
 
+
     @RequestMapping(path = "/todos", method = RequestMethod.GET)
     public List<Todo> getTodos(){
 
@@ -28,6 +34,7 @@ public class TodoController {
 
     @RequestMapping(path = "/todos/{id}", method = RequestMethod.GET)
     public Todo getTodo(@PathVariable(name = "id", required = true) Integer id){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         Todo todo = todoRepo.findOne(id);
 
@@ -51,9 +58,6 @@ public class TodoController {
         return todo;
     }
 
-
-
-    @Secured({"MANAGER"})
     @RequestMapping(path = "/todos/{id}", method = RequestMethod.DELETE)
     public Boolean deleteTodo(@PathVariable(name = "id") Integer id){
 

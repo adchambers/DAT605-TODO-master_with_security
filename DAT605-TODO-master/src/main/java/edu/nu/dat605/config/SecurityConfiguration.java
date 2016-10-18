@@ -3,11 +3,12 @@ package edu.nu.dat605.config;
 import org.apache.tomcat.jdbc.pool.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Role;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
-@EnableWebMvcSecurity
+@EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
@@ -27,11 +28,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     DataSource dataSource;
 
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable();
-    }
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http
+                    .authorizeRequests()
+                    .anyRequest().authenticated()
+                    .and()
+                    .httpBasic()
+                    .and()
+                    .csrf().disable();
+        }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -54,6 +60,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
             authorities.add(new SimpleGrantedAuthority("MANAGER"));
             User managerUserDetails = new User("manager", encoder.encode("password"), authorities);
+
 
             userDetailsService.createUser(managerUserDetails);
         }

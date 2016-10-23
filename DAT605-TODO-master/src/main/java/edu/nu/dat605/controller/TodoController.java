@@ -1,22 +1,18 @@
 package edu.nu.dat605.controller;
 
+import com.wordnik.swagger.annotations.ApiResponse;
+import com.wordnik.swagger.annotations.ApiResponses;
 import edu.nu.dat605.entity.Todo;
 import edu.nu.dat605.repository.TodoRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Created by ZS13478 on 9/29/2016.
- */
-@RestController
+@Controller
 @RequestMapping(path = "/api")
 public class TodoController {
 
@@ -24,46 +20,60 @@ public class TodoController {
     TodoRepo todoRepo;
 
 
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Success", response = Todo.class),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 404, message = "Not Found"),
+            @ApiResponse(code = 500, message = "Failure")})
     @RequestMapping(path = "/todos", method = RequestMethod.GET)
-    public List<Todo> getTodos(){
+    public ResponseEntity<List<Todo>> getTodos(){
 
         List<Todo> todos = todoRepo.findAll();
 
-        return todos;
+        return new ResponseEntity<List<Todo>>(todos, HttpStatus.OK);
     }
 
     @RequestMapping(path = "/todos/{id}", method = RequestMethod.GET)
-    public Todo getTodo(@PathVariable(name = "id", required = true) Integer id){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<Todo> getTodo(@PathVariable(name = "id", required = true) Integer id){
 
         Todo todo = todoRepo.findOne(id);
 
-        return todo;
+        return new ResponseEntity<Todo>(todo, HttpStatus.OK);
     }
 
 
     @RequestMapping(path = "/todos", method = RequestMethod.POST)
-    public Todo createTodo(@RequestBody Todo _todo){
+    public ResponseEntity<?> createTodo(@RequestBody Todo _todo) {
 
+        if(_todo.getId() != null && todoRepo.exists(_todo.getId())) {
+            return new ResponseEntity<String>("Todo with Id "+ _todo.getId() +" already exists", HttpStatus.CONFLICT);
+        }
         Todo todo = todoRepo.save(_todo);
 
-        return todo;
+        return new ResponseEntity<Todo>(todo, HttpStatus.CREATED);
     }
 
     @RequestMapping(path = "/todos/{id}", method = RequestMethod.PUT)
-    public Todo updateTodo(@RequestBody Todo _todo){
+    public ResponseEntity<?> updateTodo(@RequestBody Todo _todo) {
+
+        if(_todo.getId() == null || !todoRepo.exists(_todo.getId())) {
+            return new ResponseEntity<String>("Todo with Id " + _todo.getId() + " does not exist", HttpStatus.CONFLICT);
+        }
 
         Todo todo = todoRepo.save(_todo);
 
-        return todo;
+        return new ResponseEntity<Todo>(todo, HttpStatus.OK);
     }
 
     @RequestMapping(path = "/todos/{id}", method = RequestMethod.DELETE)
-    public Boolean deleteTodo(@PathVariable(name = "id") Integer id){
-
+    public ResponseEntity deleteTodo(@PathVariable(name = "id") Integer id) {
+        if(id == null || !todoRepo.exists(id)) {
+            return new ResponseEntity<String>("Todo with Id " + id + " does not exist", HttpStatus.CONFLICT);
+        }
         todoRepo.delete(id);
 
-        return true;
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
+
 
 }
